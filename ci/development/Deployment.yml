@@ -1,0 +1,41 @@
+apiVersion: apps/v1beta1 # for versions before 1.8.0 use apps/v1beta1
+kind: Deployment
+metadata:
+  name: tmt
+  labels:
+      run: tmt
+spec:
+  selector:
+    matchLabels:
+      run: tmt
+  strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+  replicas: 1 # tells deployment to run 3 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        run: tmt
+    spec:
+      containers:
+      - image: ind.gcr.io/batch-269417/tmt
+        imagePullPolicy: Always
+        name: tmt
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        env:
+        - name: host
+          value: dev.poc.batch
+        - name: SPRING_PROFILES_ACTIVE
+          value: development
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 120
